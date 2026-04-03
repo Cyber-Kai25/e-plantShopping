@@ -3,8 +3,14 @@ import './ProductList.css'
 import CartItem from './CartItem';
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
-    const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+  const [showPlants, setShowPlants] = useState(false);
 
+  const dispatch = useDispatch();
+  const cartItems = useSelector(state => state.cart.items);
+
+  const calculateTotalQuantity = () => {
+    return cartItems ? cartItems.reduce((total, item) => total + item.quantity, 0) : 0;
+  };
     const plantsArray = [
         {
             category: "Air Purifying Plants",
@@ -232,6 +238,13 @@ function ProductList({ onHomeClick }) {
         fontSize: '30px',
         textDecoration: 'none',
     }
+    const handleAddToCart = (plant) => {
+     dispatch(addItem(plant));
+     };
+    const isAddedToCart = (plantName) => {
+     return cartItems.some(item => item.name === plantName);
+     };
+
 
     const handleHomeClick = (e) => {
         e.preventDefault();
@@ -273,14 +286,42 @@ function ProductList({ onHomeClick }) {
                 </div>
             </div>
             {!showCart ? (
-                <div className="product-grid">
-
-
-                </div>
-            ) : (
-                <CartItem onContinueShopping={handleContinueShopping} />
-            )}
+        <div className="product-grid">
+          {plantsArray.map((category, index) => (
+            <div key={index}>
+              <h1><div className="h1">{category.category}</div></h1>
+              <div className="product-list">
+                {category.plants.map((plant, plantIndex) => (
+                  <div className="product-card" key={plantIndex}>
+                    <img
+                      className="product-image"
+                      src={plant.image}
+                      alt={plant.name}
+                    />
+                    <div className="product-title">{plant.name}</div>
+                    <div className="product-price" style={{ color: '#E74C3C' }}>
+                      {plant.cost}
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#555', marginBottom: '8px', textAlign: 'center' }}>
+                      {plant.description}
+                    </div>
+                    <button
+                      className={`product-button ${isAddedToCart(plant.name) ? 'added-to-cart' : ''}`}
+                      onClick={() => handleAddToCart(plant)}
+                      disabled={isAddedToCart(plant.name)}
+                    >
+                      {isAddedToCart(plant.name) ? 'Added to Cart' : 'Add to Cart'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
+      ) : (
+        <CartItem onContinueShopping={handleContinueShopping} />
+      )}
+    </div>
     );
 }
 
